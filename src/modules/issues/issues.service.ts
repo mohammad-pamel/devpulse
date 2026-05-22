@@ -15,9 +15,20 @@ const issuesCreateIntoDB = async (payload: IIssues) => {
 
     // const hashPassword = await bcrypt.hash(password_hash, 10);
 
+     if (description.length < 20) {
+        throw new Error("Description must be at least 20 characters")
+    }
+
+    if (type !== "bug" && type !== "feature_request") {
+        throw new Error("Type must be bug or feature_request");
+    }
+
+
     const result = await pool.query(`
         INSERT INTO issues(title, description, type, status, reporter_id) VALUES($1,$2,$3,COALESCE($4,'open'),$5) RETURNING *
         `, [title, description, type, status, reporter_id])
+
+   
 
     // delete result.rows[0].password;
 
@@ -25,7 +36,7 @@ const issuesCreateIntoDB = async (payload: IIssues) => {
     return result;
 }
 
-// const getAlllIssuessFromDB = async (userId: number) => {
+// const getAllIssuesFromDB = async (userId: number) => {
 
 //     // const { reporter_id } = payload;
 
@@ -136,20 +147,18 @@ const updateIssuesFromDB = async (payload: IIssues, id: string) => {
 
     const { title, description, type, status, reporter_id } = payload
 
-     const result = await pool.query(`
+    const result = await pool.query(`
         UPDATE issues
         SET
         title=COALESCE($1, title),
         description=COALESCE($2, description),
         type=COALESCE($3, type),
-        status=COALESCE($4, 'in_progress'),
-        reporter_id=COALESCE($5, reporter_id)
-        WHERE id=$6 RETURNING *
-        `, [title, description, type, status, reporter_id, id])
+        status=COALESCE($4, status),
+        updated_at = NOW()
+        WHERE id=$5 RETURNING *
+        `, [title, description, type, status, id])
 
-        console.log("service.ts", result)
-
-        return result;
+    return result;
 
 }
 
@@ -158,7 +167,7 @@ const deleteIssuesFromDB = async (id: string) => {
             DELETE FROM issues WHERE id=$1
             `, [id])
 
-            return result;
+    return result;
 }
 
 export const issuesService = {

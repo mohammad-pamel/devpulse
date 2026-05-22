@@ -6,18 +6,27 @@ import config from "../../config";
 
 const usersCreateIntoDB = async (payload: IAuth) => {
 
-    const {name, email, password, role} = payload;
+    const { name, email, password, role } = payload;
 
-    // const hashPassword = await bcrypt.hash(password_hash, 10);
+    const hashPassword = await bcrypt.hash(password, 10);
 
     const result = await pool.query(`
-        INSERT INTO users(name,email,password,role) VALUES($1,$2,$3,COALESCE($4,'contributor')) RETURNING *
-        `, [name, email, password, role])
+        INSERT INTO users(name,email,password,role) VALUES($1,$2,$3,COALESCE($4,'contributor')) RETURNING id, name, email, role, created_at, updated_at
+        `, [name, email, hashPassword, role])
 
-        // delete result.rows[0].password;
+    // delete result.rows[0].password;
 
-        console.log("service result",result);
-        return result;
+    if (!name || !email || !password) {
+        throw new Error("All fields are required");
+    }
+
+    const validRoles = ["contributor", "maintainer"];
+
+    if (role && !validRoles.includes(role)) {
+        throw new Error("Invalid role");
+    }
+
+    return result;
 }
 
 const getAlllUsersFromDB = async () => {
@@ -25,7 +34,7 @@ const getAlllUsersFromDB = async () => {
             SELECT * FROM users
             `)
 
-            return result;
+    return result;
 }
 
 const loginUserIntoDB = async (payload: {
@@ -44,14 +53,13 @@ const loginUserIntoDB = async (payload: {
     }
 
     const user = userData.rows[0];
-    delete user.password;
+    
 
-    // const matchPassword = await bcrypt.compare(password, user.password);
-    // console.log(matchPassword)
+    const matchPassword = await bcrypt.compare(password, user.password);
 
-    // if (!matchPassword) {
-    //     throw new Error("Invalid Credentials!");
-    // }
+    if (!matchPassword) {
+        throw new Error("Invalid Credentials!");
+    }
 
     const jwtpayload = {
         id: user.id,
@@ -60,18 +68,17 @@ const loginUserIntoDB = async (payload: {
         role: user.role
     }
 
-    const accessToken = jwt.sign(jwtpayload, config.secret as string, { expiresIn: "1d" });
+    delete user.password;
+
+    const token = jwt.sign(jwtpayload, config.secret as string, { expiresIn: "1d" });
 
     // const refreshToken = jwt.sign(jwtpayload, config.refresh_secret as string, { expiresIn: "10d" });
 
-    return { accessToken, user };
+    return { token, user };
 }
 
 export const authService = {
     usersCreateIntoDB,
     getAlllUsersFromDB,
     loginUserIntoDB
-    // getSingleUserFromDB,
-    // updateUserFromDB,
-    // deleteUserFromDB
 }

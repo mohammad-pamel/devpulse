@@ -19,7 +19,7 @@ const createIssues = async (req: Request, res: Response) => {
         sendResponse(res, {
             statusCode: 201,
             success: true,
-            message: "User Created Successfully",
+            message: "Issue Created Successfully",
             data: result.rows[0],
         })
 
@@ -83,29 +83,33 @@ const getAllIssues = async (req: Request, res: Response) => {
 };
 
 const getSingleIssues = async (req: Request, res: Response) => {
-    
+
     try {
-        
+
         const { id } = req.params;
 
         console.log(id)
         const result = await issuesService.getSingleIssuesFromDB(id as string);
 
         if (!result) {
-            return res.status(404).json({
+            return sendResponse(res, {
+                statusCode: 404,
                 success: false,
                 message: "Issue not found",
                 data: {}
-            });
+            })
         }
 
-        res.status(201).json({
+        sendResponse(res, {
+            statusCode: 200,
             success: true,
             message: "User Retrieve Successfully",
             data: result
         })
+
     } catch (error: any) {
-        res.status(500).json({
+        sendResponse(res, {
+            statusCode: 500,
             success: false,
             message: error.message,
             error: error
@@ -114,31 +118,59 @@ const getSingleIssues = async (req: Request, res: Response) => {
 }
 
 const updateIssues = async (req: Request, res: Response) => {
-    const { id } = req.params;
-    const { name, password_hash, password_argon, age, role, is_activate } = req.body;
-
+    
     try {
+        const { id } = req.params;
 
-        const result = await issuesService.updateIssuesFromDB(req.body, id as string)
+        const issuesResult = await issuesService.getSingleIssuesFromDB(id as string)
 
-        console.log("controller.ts", result)
 
-        if (result.rows.length === 0) {
-            res.status(404).json({
+        if (!issuesResult) {
+            sendResponse(res, {
+                statusCode: 404,
                 success: false,
                 message: "User not found",
                 data: {}
             })
         }
 
+        const user = req.user;
+
+        if(user?.role === "maintainer"){
+            if(issuesResult?.reporter.id !== user?.id){
+                return sendResponse(res, {
+                    statusCode: 403,
+                    success: false,
+                    message: "Forbidden Access",
+                    data: {}
+                });
+            }
+
+            if(issuesResult?.status !== "open"){
+                return sendResponse(res, {
+                    statusCode: 409,
+                    success: false,
+                    message: "Issue already in progress/resolved",
+                    data: {}
+                });
+            }
+
+        }
+        
+        const result = await issuesService.updateIssuesFromDB(req.body, id as string)
+        
+
         // console.log(result);
-        res.status(201).json({
+        sendResponse(res, {
+            statusCode: 200,
             success: true,
-            message: "User Update Successfully",
+            message: "Issue Updated Successfully",
             data: result.rows[0]
         })
+
     } catch (error: any) {
-        res.status(500).json({
+        sendResponse(res, {
+            statusCode: 500,
             success: false,
             message: error.message,
             error: error
@@ -154,25 +186,31 @@ const deleteIssues = async (req: Request, res: Response) => {
         const result = await issuesService.deleteIssuesFromDB(id as string)
 
         if (result.rowCount === 0) {
-            res.status(404).json({
+            sendResponse(res, {
+                statusCode: 404,
                 success: false,
                 message: "User not found",
                 data: {}
             })
+
         }
 
-        res.status(201).json({
+        sendResponse(res, {
+            statusCode: 201,
             success: true,
-            message: "User Delete Successfully",
-            data: result.rows[0]
+            message: "Issue Deleted Successfully",
+            data: {}
         })
 
+
     } catch (error: any) {
-        res.status(500).json({
+        sendResponse(res, {
+            statusCode: 500,
             success: false,
             message: error.message,
             error: error
         })
+
     }
 }
 
