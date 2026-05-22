@@ -7,7 +7,7 @@ import { authController } from "./auth.controller";
 const router = Router()
 
 router.post('/signup', authController.createUser)
-// router.post('/login', authController.loginUser)
+router.post('/login', authController.loginUser)
 
 // router.post('/api/auth/signup', )
 

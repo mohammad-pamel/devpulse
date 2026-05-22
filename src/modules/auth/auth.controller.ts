@@ -27,7 +27,56 @@ const createUser = async (req: Request, res: Response) => {
     }
 }
 
+const getAllUsers = async (req: Request, res: Response) => {
+    // console.log("controller", req.user)
+    try {
+        
+        const result = await authService.getAlllUsersFromDB();
 
+        res.status(201).json({
+            success: true,
+            message: "Users Retrieve Successfully",
+            data: result.rows
+        })
+    } catch (error: any) {
+        res.status(500).json({
+            success: false,
+            message: error.message,
+            error: error
+        })
+    }
+}
+
+const loginUser = async (req: Request,res: Response) => {
+    
+    try {
+
+        const result = await authService.loginUserIntoDB(req.body);
+        console.log(result)
+
+        const{ accessToken } = result;
+
+        res.cookie("refreshToken", accessToken, {
+            secure: false,
+            httpOnly: true,
+            sameSite: 'lax'
+        })
+
+        res.status(201).json({
+        success: true,
+        message: "Profile login successfully",
+        data: result
+    })
+        
+    } catch (error: any) {
+        res.status(500).json({
+            success: false,
+            message: error.message,
+            error: error
+        })
+        
+    }
+}
 
 export const authController ={
     createUser,
