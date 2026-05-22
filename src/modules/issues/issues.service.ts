@@ -93,16 +93,28 @@ const getAllIssuesFromDB = async (query: any) => {
 };
 
 const getSingleIssuesFromDB = async (id: string) => {
-    const issuesresult = await pool.query(`
-            SELECT * FROM issues WHERE id=$1
-            `, [id]);
 
-    const userresult = await pool.query(`
-            SELECT id, name, role FROM users WHERE id=$1
-            `, [issuesresult.rows[0].reporter_id]);
+    const issuesresult = await pool.query(
+        `SELECT * FROM issues WHERE id=$1`,
+        [id]
+    );
 
-    const issue = issuesresult.rows[0]
-    const user = userresult.rows[0]
+    console.log("service", issuesresult)
+    // issue exists check
+    if (issuesresult.rows.length === 0) {
+        return null;
+    }
+
+    const issue = issuesresult.rows[0];
+
+    const userresult = await pool.query(
+        `SELECT id, name, role FROM users WHERE id=$1`,
+        [issue.reporter_id]
+    );
+
+    console.log("sevice user", userresult)
+
+    const user = userresult.rows[0];
 
     return {
         id: issue.id,
@@ -117,8 +129,8 @@ const getSingleIssuesFromDB = async (id: string) => {
         },
         created_at: issue.created_at,
         updated_at: issue.updated_at
-    }
-}
+    };
+};
 
 const updateIssuesFromDB = async (payload: IIssues, id: string) => {
 
@@ -141,9 +153,18 @@ const updateIssuesFromDB = async (payload: IIssues, id: string) => {
 
 }
 
+const deleteIssuesFromDB = async (id: string) => {
+    const result = await pool.query(`
+            DELETE FROM issues WHERE id=$1
+            `, [id])
+
+            return result;
+}
+
 export const issuesService = {
     issuesCreateIntoDB,
     getAllIssuesFromDB,
     getSingleIssuesFromDB,
-    updateIssuesFromDB
+    updateIssuesFromDB,
+    deleteIssuesFromDB
 }

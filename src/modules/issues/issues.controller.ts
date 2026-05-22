@@ -39,7 +39,7 @@ const createIssues = async (req: Request, res: Response) => {
 //             const result = await issuesService.getAlllIssuessFromDB(userId);
 
 //             console.log("result from controller",result)
-    
+
 //             res.status(201).json({
 //                 success: true,
 //                 message: "Users Retrieve Successfully",
@@ -83,20 +83,20 @@ const getAllIssues = async (req: Request, res: Response) => {
 };
 
 const getSingleIssues = async (req: Request, res: Response) => {
-    const { id } = req.params;
-
+    
     try {
-       
+        
+        const { id } = req.params;
+
+        console.log(id)
         const result = await issuesService.getSingleIssuesFromDB(id as string);
 
-        console.log("issues controller",result);
-
         if (!result) {
-            res.status(404).json({
+            return res.status(404).json({
                 success: false,
-                message: "User not found",
+                message: "Issue not found",
                 data: {}
-            })
+            });
         }
 
         res.status(201).json({
@@ -118,7 +118,7 @@ const updateIssues = async (req: Request, res: Response) => {
     const { name, password_hash, password_argon, age, role, is_activate } = req.body;
 
     try {
-       
+
         const result = await issuesService.updateIssuesFromDB(req.body, id as string)
 
         console.log("controller.ts", result)
@@ -146,9 +146,40 @@ const updateIssues = async (req: Request, res: Response) => {
     }
 }
 
+const deleteIssues = async (req: Request, res: Response) => {
+    const { id } = req.params;
+
+    try {
+
+        const result = await issuesService.deleteIssuesFromDB(id as string)
+
+        if (result.rowCount === 0) {
+            res.status(404).json({
+                success: false,
+                message: "User not found",
+                data: {}
+            })
+        }
+
+        res.status(201).json({
+            success: true,
+            message: "User Delete Successfully",
+            data: result.rows[0]
+        })
+
+    } catch (error: any) {
+        res.status(500).json({
+            success: false,
+            message: error.message,
+            error: error
+        })
+    }
+}
+
 export const issuesController = {
     createIssues,
     getAllIssues,
     getSingleIssues,
-    updateIssues
+    updateIssues,
+    deleteIssues
 }

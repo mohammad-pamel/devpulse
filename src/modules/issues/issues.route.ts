@@ -6,7 +6,8 @@ const router = Router()
 
 router.post('/', auth(), issuesController.createIssues)
 router.get('/', issuesController.getAllIssues)
-
+router.get('/:id', issuesController.getSingleIssues)
 router.put('/:id', issuesController.updateIssues)
+router.delete('/:id', issuesController.deleteIssues)
 
 export const issuesRoute = router;
