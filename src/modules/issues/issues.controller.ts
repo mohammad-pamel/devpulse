@@ -113,8 +113,42 @@ const getSingleIssues = async (req: Request, res: Response) => {
     }
 }
 
+const updateIssues = async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const { name, password_hash, password_argon, age, role, is_activate } = req.body;
+
+    try {
+       
+        const result = await issuesService.updateIssuesFromDB(req.body, id as string)
+
+        console.log("controller.ts", result)
+
+        if (result.rows.length === 0) {
+            res.status(404).json({
+                success: false,
+                message: "User not found",
+                data: {}
+            })
+        }
+
+        // console.log(result);
+        res.status(201).json({
+            success: true,
+            message: "User Update Successfully",
+            data: result.rows[0]
+        })
+    } catch (error: any) {
+        res.status(500).json({
+            success: false,
+            message: error.message,
+            error: error
+        })
+    }
+}
+
 export const issuesController = {
     createIssues,
     getAllIssues,
-    getSingleIssues
+    getSingleIssues,
+    updateIssues
 }

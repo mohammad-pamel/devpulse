@@ -110,7 +110,6 @@ const getSingleIssuesFromDB = async (id: string) => {
         description: issue.description,
         type: issue.type,
         status: issue.status,
-        
         reporter: {
             id: user.id,
             name: user.name,
@@ -121,8 +120,30 @@ const getSingleIssuesFromDB = async (id: string) => {
     }
 }
 
+const updateIssuesFromDB = async (payload: IIssues, id: string) => {
+
+    const { title, description, type, status, reporter_id } = payload
+
+     const result = await pool.query(`
+        UPDATE issues
+        SET
+        title=COALESCE($1, title),
+        description=COALESCE($2, description),
+        type=COALESCE($3, type),
+        status=COALESCE($4, 'in_progress'),
+        reporter_id=COALESCE($5, reporter_id)
+        WHERE id=$6 RETURNING *
+        `, [title, description, type, status, reporter_id, id])
+
+        console.log("service.ts", result)
+
+        return result;
+
+}
+
 export const issuesService = {
     issuesCreateIntoDB,
     getAllIssuesFromDB,
-    getSingleIssuesFromDB
+    getSingleIssuesFromDB,
+    updateIssuesFromDB
 }
