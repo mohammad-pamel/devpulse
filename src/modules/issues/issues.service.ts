@@ -25,6 +25,22 @@ const issuesCreateIntoDB = async (payload: IIssues) => {
     return result;
 }
 
+const getAlllIssuessFromDB = async (userId: number) => {
+
+    // const { reporter_id } = payload;
+
+    //  const user = await pool.query(`
+    //     SELECT * FROM users WHERE id=$1
+    //     `, [reporter_id])
+
+
+    const result = await pool.query(`
+            SELECT * FROM issues WHERE reporter_id=$1
+            `,[userId])
+
+            console.log("user from service", result)
+            return result;
+}
 
 export const issuesService = {
     issuesCreateIntoDB,
