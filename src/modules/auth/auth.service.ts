@@ -8,7 +8,7 @@ const usersCreateIntoDB = async (payload: IAuth) => {
 
     const { name, email, password, role } = payload;
 
-    const hashPassword = await bcrypt.hash(password, 10);
+    const hashPassword = await bcrypt.hash(password, 12);
 
     const result = await pool.query(`
         INSERT INTO users(name,email,password,role) VALUES($1,$2,$3,COALESCE($4,'contributor')) RETURNING id, name, email, role, created_at, updated_at
@@ -71,8 +71,6 @@ const loginUserIntoDB = async (payload: {
     delete user.password;
 
     const token = jwt.sign(jwtpayload, config.secret as string, { expiresIn: "1d" });
-
-    // const refreshToken = jwt.sign(jwtpayload, config.refresh_secret as string, { expiresIn: "10d" });
 
     return { token, user };
 }

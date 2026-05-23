@@ -13,8 +13,6 @@ const issuesCreateIntoDB = async (payload: IIssues) => {
         throw new Error("User not exists");
     }
 
-    // const hashPassword = await bcrypt.hash(password_hash, 10);
-
      if (description.length < 20) {
         throw new Error("Description must be at least 20 characters")
     }
@@ -53,54 +51,59 @@ const issuesCreateIntoDB = async (payload: IIssues) => {
 //             return result;
 // }
 
-//Challenge part
-const getAllIssuesFromDB = async (query: any) => {
+const getAllIssuesFromDB = async (query: {
+    sort?: string;
+    type?: string;
+    status?: string;
+}) => {
 
     const { sort = "newest", type, status } = query;
 
-    let sql = `
-        SELECT 
-            i.*,
-            u.id AS user_id,
-            u.name,
-            u.role
-        FROM issues i
-        JOIN users u ON i.reporter_id = u.id
-        WHERE 1=1
-    `;
-
+    let sql = `SELECT * FROM issues WHERE 1=1`;
     const values: any[] = [];
 
     if (type) {
         values.push(type);
-        sql += ` AND i.type = $${values.length}`;
+        sql += ` AND type = $${values.length}`;
     }
 
     if (status) {
         values.push(status);
-        sql += ` AND i.status = $${values.length}`;
+        sql += ` AND status = $${values.length}`;
     }
 
     sql += sort === "oldest"
-        ? " ORDER BY i.created_at ASC"
-        : " ORDER BY i.created_at DESC";
+        ? ` ORDER BY created_at ASC`
+        : ` ORDER BY created_at DESC`;
 
-    const result = await pool.query(sql, values);
+    const { rows: issues } = await pool.query(sql, values);
 
-    return result.rows.map((row) => ({
-        id: row.id,
-        title: row.title,
-        description: row.description,
-        type: row.type,
-        status: row.status,
-        created_at: row.created_at,
-        updated_at: row.updated_at,
-        reporter: {
-            id: row.user_id,
-            name: row.name,
-            role: row.role,
-        },
-    }));
+    const result = [];
+
+    for (let i = 0; i < issues.length; i++) {
+
+        const issue = issues[i];
+
+        const { rows: users } = await pool.query(
+            `SELECT id, name, role FROM users WHERE id=$1`,
+            [issue.reporter_id]
+        );
+
+        const user = users[0];
+
+        result.push({
+            id: issue.id,
+            title: issue.title,
+            description: issue.description,
+            type: issue.type,
+            status: issue.status,
+            reporter: user,
+            created_at: issue.created_at,
+            updated_at: issue.updated_at
+        });
+    }
+
+    return result;
 };
 
 const getSingleIssuesFromDB = async (id: string) => {

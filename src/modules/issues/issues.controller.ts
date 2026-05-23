@@ -33,28 +33,6 @@ const createIssues = async (req: Request, res: Response) => {
     }
 }
 
-// const getAllIssues = async (req: Request, res: Response) => {
-//      try {
-//             const userId = req.user?.id;
-//             const result = await issuesService.getAlllIssuessFromDB(userId);
-
-//             console.log("result from controller",result)
-
-//             res.status(201).json({
-//                 success: true,
-//                 message: "Users Retrieve Successfully",
-//                 data: result.rows
-//             })
-//         } catch (error: any) {
-//             res.status(500).json({
-//                 success: false,
-//                 message: error.message,
-//                 error: error
-//             })
-//         }
-// }
-
-
 //Challeng part
 const getAllIssues = async (req: Request, res: Response) => {
     try {
@@ -66,10 +44,17 @@ const getAllIssues = async (req: Request, res: Response) => {
             status: status as string,
         });
 
+        if(!result){
+           return sendResponse(res, {
+            statusCode: 404,
+            success: false,
+            message: "Issue not found!",
+        });
+        }
+
         sendResponse(res, {
             statusCode: 200,
             success: true,
-            message: "Issues fetched successfully",
             data: result,
         });
 
