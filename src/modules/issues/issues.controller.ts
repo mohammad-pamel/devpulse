@@ -88,7 +88,6 @@ const getSingleIssues = async (req: Request, res: Response) => {
         sendResponse(res, {
             statusCode: 200,
             success: true,
-            message: "User Retrieve Successfully",
             data: result
         })
 

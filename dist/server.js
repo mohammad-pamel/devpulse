@@ -77,7 +77,7 @@ var initDB = async () => {
 };
 
 // src/modules/auth/auth.service.ts
-var usersCreateIntoDB = async (payload) => {
+var userSignupIntoDB = async (payload) => {
   const { name, email, password, role } = payload;
   const hashPassword = await bcrypt.hash(password, 12);
   const result = await pool.query(`
@@ -116,15 +116,14 @@ var loginUserIntoDB = async (payload) => {
   return { token, user };
 };
 var authService = {
-  usersCreateIntoDB,
+  userSignupIntoDB,
   loginUserIntoDB
 };
 
 // src/modules/auth/auth.controller.ts
-var createUser = async (req, res) => {
-  console.log("controller", req.body);
+var signupUser = async (req, res) => {
   try {
-    const result = await authService.usersCreateIntoDB(req.body);
+    const result = await authService.userSignupIntoDB(req.body);
     sendResponse_default(res, {
       statusCode: 201,
       success: true,
@@ -165,13 +164,13 @@ var loginUser = async (req, res) => {
   }
 };
 var authController = {
-  createUser,
+  signupUser,
   loginUser
 };
 
 // src/modules/auth/auth.route.ts
 var router = Router();
-router.post("/signup", authController.createUser);
+router.post("/signup", authController.signupUser);
 router.post("/login", authController.loginUser);
 var authRoute = router;
 
@@ -361,7 +360,6 @@ var getSingleIssues = async (req, res) => {
     sendResponse_default(res, {
       statusCode: 200,
       success: true,
-      message: "User Retrieve Successfully",
       data: result
     });
   } catch (error) {
@@ -435,8 +433,7 @@ var deleteIssues = async (req, res) => {
     sendResponse_default(res, {
       statusCode: 201,
       success: true,
-      message: "Issue Deleted Successfully",
-      data: {}
+      message: "Issue Deleted Successfully"
     });
   } catch (error) {
     sendResponse_default(res, {
@@ -459,7 +456,6 @@ var issuesController = {
 import jwt2 from "jsonwebtoken";
 var auth = (...roles) => {
   return async (req, res, next) => {
-    console.log("roles auth.ts", roles);
     try {
       const token = req.headers.authorization;
       if (!token) {
@@ -527,8 +523,8 @@ app.use(cors({
 }));
 app.get("/", (req, res) => {
   res.status(200).json({
-    "message": "Express Serveer",
-    "author": "Next Level"
+    "message": "DevPulse",
+    "author": "Mohammad Pamel"
   });
 });
 app.use("/api/auth", authRoute);
