@@ -27,29 +27,6 @@ const createUser = async (req: Request, res: Response) => {
     }
 }
 
-const getAllUsers = async (req: Request, res: Response) => {
-    // console.log("controller", req.user)
-    try {
-
-        const result = await authService.getAlllUsersFromDB();
-
-        sendResponse(res, {
-            statusCode: 200,
-            success: true,
-            data: result.rows,
-        })
-
-    } catch (error: any) {
-
-        sendResponse(res, {
-            statusCode: 500,
-            success: false,
-            message: error.message,
-            error: error
-        })
-
-    }
-}
 
 const loginUser = async (req: Request, res: Response) => {
 
@@ -86,6 +63,5 @@ const loginUser = async (req: Request, res: Response) => {
 
 export const authController = {
     createUser,
-    getAllUsers,
     loginUser
 }

@@ -29,13 +29,6 @@ const usersCreateIntoDB = async (payload: IAuth) => {
     return result;
 }
 
-const getAlllUsersFromDB = async () => {
-    const result = await pool.query(`
-            SELECT * FROM users
-            `)
-
-    return result;
-}
 
 const loginUserIntoDB = async (payload: {
     email: string;
@@ -77,6 +70,5 @@ const loginUserIntoDB = async (payload: {
 
 export const authService = {
     usersCreateIntoDB,
-    getAlllUsersFromDB,
     loginUserIntoDB
 }
