@@ -92,12 +92,6 @@ var usersCreateIntoDB = async (payload) => {
   }
   return result;
 };
-var getAlllUsersFromDB = async () => {
-  const result = await pool.query(`
-            SELECT * FROM users
-            `);
-  return result;
-};
 var loginUserIntoDB = async (payload) => {
   const { email, password } = payload;
   const userData = await pool.query(`
@@ -123,7 +117,6 @@ var loginUserIntoDB = async (payload) => {
 };
 var authService = {
   usersCreateIntoDB,
-  getAlllUsersFromDB,
   loginUserIntoDB
 };
 
@@ -137,23 +130,6 @@ var createUser = async (req, res) => {
       success: true,
       message: "User Registered Successfully",
       data: result.rows[0]
-    });
-  } catch (error) {
-    sendResponse_default(res, {
-      statusCode: 500,
-      success: false,
-      message: error.message,
-      error
-    });
-  }
-};
-var getAllUsers = async (req, res) => {
-  try {
-    const result = await authService.getAlllUsersFromDB();
-    sendResponse_default(res, {
-      statusCode: 200,
-      success: true,
-      data: result.rows
     });
   } catch (error) {
     sendResponse_default(res, {
@@ -190,7 +166,6 @@ var loginUser = async (req, res) => {
 };
 var authController = {
   createUser,
-  getAllUsers,
   loginUser
 };
 
@@ -198,7 +173,6 @@ var authController = {
 var router = Router();
 router.post("/signup", authController.createUser);
 router.post("/login", authController.loginUser);
-router.get("/", authController.getAllUsers);
 var authRoute = router;
 
 // src/modules/issues/issues.route.ts

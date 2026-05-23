@@ -4,7 +4,7 @@ import { pool } from "../../db";
 import type { IAuth } from "./auth.interface";
 import config from "../../config";
 
-const usersCreateIntoDB = async (payload: IAuth) => {
+const userSignupIntoDB = async (payload: IAuth) => {
 
     const { name, email, password, role } = payload;
 
@@ -69,6 +69,6 @@ const loginUserIntoDB = async (payload: {
 }
 
 export const authService = {
-    usersCreateIntoDB,
+    userSignupIntoDB,
     loginUserIntoDB
 }

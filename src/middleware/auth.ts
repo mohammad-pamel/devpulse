@@ -7,7 +7,6 @@ import sendResponse from "../utility/sendResponse";
 
 const auth = (...roles: Roles[]) => {
   return async (req: Request, res: Response, next: NextFunction) => {
-    console.log("roles auth.ts", roles);
     try {
       const token = req.headers.authorization;
 
@@ -46,6 +45,7 @@ const auth = (...roles: Roles[]) => {
       req.user = decoded;
 
       next();
+      
     } catch (error) {
       next(error)
     }

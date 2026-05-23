@@ -2,13 +2,11 @@ import type { Request, Response } from "express";
 import sendResponse from "../../utility/sendResponse";
 import { authService } from "./auth.service";
 
-const createUser = async (req: Request, res: Response) => {
-    console.log("controller", req.body);
-    // const { name, email } = req.body;
+const signupUser = async (req: Request, res: Response) => {
 
     try {
 
-        const result = await authService.usersCreateIntoDB(req.body);
+        const result = await authService.userSignupIntoDB(req.body);
 
         sendResponse(res, {
             statusCode: 201,
@@ -53,7 +51,7 @@ const loginUser = async (req: Request, res: Response) => {
 
         sendResponse(res, {
             statusCode: 500,
-             success: false,
+            success: false,
             message: error.message,
             error: error
         })
@@ -62,6 +60,6 @@ const loginUser = async (req: Request, res: Response) => {
 }
 
 export const authController = {
-    createUser,
+    signupUser,
     loginUser
 }

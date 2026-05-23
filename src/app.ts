@@ -16,8 +16,8 @@ app.use(cors({
 
 app.get('/', (req: Request, res: Response) => {
     res.status(200).json({
-        "message": "Express Serveer",
-        "author": "Next Level"
+        "message": "DevPulse",
+        "author": "Mohammad Pamel"
     })
 })
 

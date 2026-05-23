@@ -184,7 +184,6 @@ const deleteIssues = async (req: Request, res: Response) => {
             statusCode: 201,
             success: true,
             message: "Issue Deleted Successfully",
-            data: {}
         })
 
 
